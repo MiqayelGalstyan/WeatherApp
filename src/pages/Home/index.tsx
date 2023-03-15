@@ -21,10 +21,7 @@ import {
 } from "../../store/models/interfaces/app.interface";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useStyles } from "./styles";
-import {
-  celsiusToFahrenheit,
-  fahrenheitToCelsius,
-} from "../../shared/helpers/converter";
+import { fahrenheitToCelsius } from "../../shared/helpers/converter";
 import CardUI from "../../shared/ui/Card";
 import { weatherIconsData } from "../../shared/constants/weatherIconsData";
 import { IWeatherIcon } from "../../store/models/interfaces/icon.interface";
@@ -129,19 +126,17 @@ const Home = (): JSX.Element => {
     }
   }, []);
 
-  const fahrenheit = useCallback((val: number): string | undefined => {
-    if (val) {
-      const value = celsiusToFahrenheit(val);
-      return `${Math.round(value)}`;
-    }
-  }, []);
-
   const realTemperatureFeelsLike = useMemo((): string | undefined => {
     if (currentDay?.RealFeelTemperature.Value) {
-      const value = fahrenheitToCelsius(currentDay.RealFeelTemperature.Value);
-      return `${Math.round(value)}\xB0`;
+      const value =
+        type === EUnitType.CELSIUS
+          ? `${Math.round(
+              fahrenheitToCelsius(currentDay.RealFeelTemperature.Value)
+            )}\xB0`
+          : `${currentDay.RealFeelTemperature.Value}\xB0F`;
+      return value;
     }
-  }, [currentDay?.RealFeelTemperature?.Value]);
+  }, [currentDay?.RealFeelTemperature?.Value, type]);
 
   const findWeatherIcon = useCallback((val: string) => {
     if (val) {
@@ -156,7 +151,8 @@ const Home = (): JSX.Element => {
     <Fragment>
       <Box className={styles.container}>
         <Box className={styles.row}>
-          <Box className={styles.leftPane}>
+          <Box className={styles.leftPane}>aa</Box>
+          <Box className={styles.center}>
             <Autocomplete
               className={styles.mainColor}
               value={autocompleteValue ?? null}
@@ -198,7 +194,9 @@ const Home = (): JSX.Element => {
                   <Box display="flex" mt={5} justifyContent="space-between">
                     <Typography variant="h4" mt={3}>
                       Temperature:{" "}
-                      {`${celsius(currentDay?.Temperature?.Value)}\xB0`}
+                      {type === EUnitType.CELSIUS
+                        ? `${celsius(currentDay?.Temperature?.Value)}\xB0`
+                        : `${currentDay?.Temperature?.Value}\xB0F`}
                     </Typography>
                     <img
                       src={findWeatherIcon(currentDay?.IconPhrase)}
@@ -271,9 +269,14 @@ const Home = (): JSX.Element => {
                               />
                               <Typography>
                                 <span className={styles.bold}>
-                                  {celsius(item.Temperature.Maximum.Value)}
+                                  {type === EUnitType.CELSIUS
+                                    ? celsius(item.Temperature.Maximum.Value)
+                                    : item.Temperature.Maximum.Value}
                                 </span>
-                                /{celsius(item.Temperature.Minimum.Value)}
+                                /
+                                {type === EUnitType.CELSIUS
+                                  ? celsius(item.Temperature.Minimum.Value)
+                                  : item.Temperature.Minimum.Value}
                               </Typography>
                             </Box>
                           )
@@ -289,7 +292,7 @@ const Home = (): JSX.Element => {
                   }}
                 >
                   <CardContent color="#d4cbcb30">
-                    <ChartHistoricalUI data={historicalDayData} />
+                    <ChartHistoricalUI data={historicalDayData} type={type} />
                   </CardContent>
                 </Card>
               </>

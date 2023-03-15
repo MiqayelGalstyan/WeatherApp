@@ -11,6 +11,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
+import { EUnitType } from "../../store/models/enums/unitType.enum";
 
 ChartJS.register(
   CategoryScale,
@@ -30,16 +31,17 @@ const options = {
     },
     title: {
       display: true,
-      text: "Past 24 Hours",
+      text: "Historical",
     },
   },
 };
 
 interface IChartProps {
   data: IHistoricalDayResponse[];
+  type: typeof EUnitType[keyof typeof EUnitType];
 }
 
-const ChartHistoricalUI = ({ data }: IChartProps): JSX.Element => {
+const ChartHistoricalUI = ({ data, type }: IChartProps): JSX.Element => {
   const labels = useMemo((): any => {
     return data
       .slice()

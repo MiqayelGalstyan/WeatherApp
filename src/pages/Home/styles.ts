@@ -14,10 +14,19 @@ export const useStyles = makeStyles(() => ({
         width: '100%'
     },
     leftPane: {
-        width: '55%'
+        width: '10%',
+        height: '95vh',
+        backgroundColor: "rgb(234, 236, 239)",
+        display:'flex',
+        flexDirection:'column',
+        justifyContent:'flex-start',
+        alignItems:'center'
+    },
+    center: {
+        width: '50%'
     },
     rightPane: {
-        width: '43%',
+        width: '35%',
         marginLeft: 2,
     },
     img: {
