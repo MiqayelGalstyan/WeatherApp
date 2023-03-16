@@ -1,16 +1,16 @@
 import { Box } from "@mui/material";
 import { useMemo } from "react";
-import { EUnitType } from "../../store/models/enums/unitType.enum";
-import { ICurrentDayResponse } from "../../store/models/interfaces/app.interface";
-import { fahrenheitToCelsius } from "../helpers/converter";
-import CardUI from "../ui/Card";
+import { EUnitType } from "../../../store/models/enums/unitType.enum";
+import { ICurrentDayResponse } from "../../../store/models/interfaces/app.interface";
+import { fahrenheitToCelsius } from "../../helpers/converter";
+import CardUI from "../../ui/Card";
 
 interface ICardsProps {
   data: ICurrentDayResponse;
   type:typeof EUnitType[keyof typeof EUnitType];
 }
 
-const Cards = ({ data,type }: ICardsProps): JSX.Element => {
+const CardsList = ({ data,type }: ICardsProps): JSX.Element => {
 
     const realTemperatureFeelsLike = useMemo((): string | undefined => {
         if (data?.RealFeelTemperature.Value) {
@@ -31,26 +31,26 @@ const Cards = ({ data,type }: ICardsProps): JSX.Element => {
         <CardUI
           title="Humidity"
           value={data.IndoorRelativeHumidity}
-          width="48%"
+          width="46%"
         />
         <CardUI
           title="Wind"
           value={`${data.Wind.Speed.Value} ${data.Wind.Speed.Unit}`}
-          width="48%"
+          width="46%"
         />
         <CardUI
           title="Chance of Rain"
           value={`${data.RainProbability}%`}
-          width="48%"
+          width="46%"
         />
         <CardUI
           title="Feels Like"
           value={`${realTemperatureFeelsLike}`}
-          width="48%"
+          width="46%"
         />
       </Box>
     </>
   );
 };
 
-export default Cards;
+export default CardsList;

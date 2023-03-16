@@ -92,14 +92,6 @@ export const useStyles = makeStyles(() => ({
         width: 80,
         height: 80,
     },
-    bold: {
-        fontWeight: 'bold'
-    },
-    rightPaneItemImg: {
-        width: 50,
-        height: 50,
-        objectFit: 'contain',
-    },
     iconArea: {
         marginTop: 20,
         width: '100%',

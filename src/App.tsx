@@ -11,7 +11,7 @@ const App = (): JSX.Element => {
         <Toaster
           position="bottom-center"
           toastOptions={{
-            duration: 5000,
+            duration: 4000,
             style: {
               fontSize: "20px",
               maxWidth: "unset",

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useCallback, useMemo, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -20,25 +19,29 @@ import {
 } from "../../store/models/interfaces/app.interface";
 import { Box, Card, CardContent, Divider, Typography } from "@mui/material";
 import { useStyles } from "./styles";
-import { fahrenheitToCelsius } from "../../shared/helpers/converter";
-import { weatherIconsData } from "../../shared/constants/weatherIconsData";
-import { IWeatherIcon } from "../../store/models/interfaces/icon.interface";
-import { format } from "date-fns";
 import ChartHistoricalUI from "../../shared/ui/Chart";
 import { EUnitType } from "../../store/models/enums/unitType.enum";
 import Umbrella from "../../assets/umbrella.png";
-import Cards from "../../shared/components/Cards";
+import CardsList from "../../shared/components/CardsList/CardsList";
 import Tabs from "../../shared/components/Tabs/Tabs";
+import useWeatherIcon from "../../shared/hooks/useWeatherIcon";
+import useFahrenheitToCelsius from "../../shared/hooks/useFahrenheitToCelsius";
+import DailyForecast from "../../shared/components/DailyForecast";
 
 const Home = (): JSX.Element => {
   const [inputValue, setInputValue] = useState<string>("");
   const [options, setOptions] = useState<ICountryCityResponse[]>([]);
-  const [autocompleteValue,setAutocompleteValue] = useState<ICountryCityResponse | null>(null);
+  const [autocompleteValue, setAutocompleteValue] =
+    useState<ICountryCityResponse | null>(null);
   const [type, setType] = useState<typeof EUnitType[keyof typeof EUnitType]>(
     EUnitType.CELSIUS
   );
 
   const dispatch = useDispatch<AppDispatch>();
+
+  const findWeatherIcon = useWeatherIcon();
+
+  const celsius = useFahrenheitToCelsius();
 
   const currentConditionsData = useSelector(selectCurrentConditionsData);
 
@@ -127,22 +130,6 @@ const Home = (): JSX.Element => {
     }
   }, [nextFiveDaysForecast]);
 
-  const celsius = useCallback((val: number): string | undefined => {
-    if (val) {
-      const value = fahrenheitToCelsius(val);
-      return `${Math.round(value)}`;
-    }
-  }, []);
-
-  const findWeatherIcon = useCallback((val: string) => {
-    if (val) {
-      const icon = weatherIconsData.find(
-        (item: IWeatherIcon) => item.value?.toLowerCase() === val?.toLowerCase()
-      );
-      return icon?.img ?? weatherIconsData[0].img;
-    }
-  }, []);
-
   return (
     <Fragment>
       <Box className={styles.container}>
@@ -208,7 +195,7 @@ const Home = (): JSX.Element => {
                     />
                   </Box>
 
-                  <Cards data={currentDay} type={type} />
+                  <CardsList data={currentDay} type={type} />
                 </Box>
               </>
             )}
@@ -218,48 +205,16 @@ const Home = (): JSX.Element => {
               <>
                 <Card style={{ backgroundColor: "rgb(234, 236, 239)" }}>
                   <CardContent color="#d4cbcb30">
-                    {nextFiveDaysData.DailyForecasts.length > 0 ? (
-                      <>
-                        <Typography
-                          variant="h5"
-                          color="rgb(147, 153, 162)"
-                          mb={3}
-                        >
-                          5 Day Forecast
-                        </Typography>
-                        {nextFiveDaysData.DailyForecasts.map(
-                          (item: any, index: number) => (
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                              alignItems="center"
-                              mb={3}
-                            >
-                              <Typography>
-                                {format(new Date(item.Date), "dd/MM/yyyy")}
-                              </Typography>
-                              <img
-                                src={findWeatherIcon(item.Day.IconPhrase)}
-                                alt={`day${index}`}
-                                className={styles.rightPaneItemImg}
-                              />
-                              <Typography textAlign="right" minWidth={50}>
-                                <span className={styles.bold}>
-                                  {type === EUnitType.CELSIUS
-                                    ? celsius(item.Temperature.Maximum.Value)
-                                    : item.Temperature.Maximum.Value}
-                                </span>
-                                /
-                                {type === EUnitType.CELSIUS
-                                  ? celsius(item.Temperature.Minimum.Value)
-                                  : item.Temperature.Minimum.Value}
-                              </Typography>
-                            </Box>
-                          )
-                        )}
-                      </>
-                    ) : null}
+                    <>
+                      <Typography
+                        variant="h5"
+                        color="rgb(147, 153, 162)"
+                        mb={3}
+                      >
+                        5 Day Forecast
+                      </Typography>
+                      <DailyForecast data={nextFiveDaysData} type={type} />
+                    </>
                   </CardContent>
                 </Card>
                 <Card
