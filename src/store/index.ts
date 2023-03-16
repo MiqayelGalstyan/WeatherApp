@@ -1,6 +1,7 @@
 import {Action, combineReducers, configureStore} from '@reduxjs/toolkit';
 import appReducer from './slicers/app';
 import axiosMiddleware from './middleware/api';
+import errorHandling from './middleware/error';
 
 const combinedReducers = combineReducers({
   app: appReducer,
@@ -15,7 +16,7 @@ const store = configureStore({
     getDefaultMiddleware({
       immutableCheck: false,
       serializableCheck: false,
-    }).concat(axiosMiddleware),
+    }).concat(axiosMiddleware).concat(errorHandling),
   enhancers: defaultEnhancers => [
     ...defaultEnhancers,
   ],

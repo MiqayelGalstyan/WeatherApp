@@ -7,14 +7,12 @@ import { ICountryCityResponse, ICurrentDayResponse, IForecastDataResponse, IHist
 export type IAppInitialState = {
     currentDayData: ICurrentDayResponse | null;
     nextFiveDaysForecast: null | IForecastDataResponse;
-    searchValue: ICountryCityResponse | null;
     historicalDayData: IHistoricalDayResponse[] | null;
 };
 
 const initialState: IAppInitialState = {
     currentDayData: null,
     nextFiveDaysForecast: null,
-    searchValue: null,
     historicalDayData: null,
 };
 
@@ -69,11 +67,7 @@ export const getHistoricalData = createAsyncThunk<IHistoricalDayResponse[], stri
 const appSlice = createSlice({
     name,
     initialState,
-    reducers: {
-        setSearchValue(state, { payload }: { payload: ICountryCityResponse | null }) {
-            state.searchValue = payload;
-        },
-    },
+    reducers: {},
     extraReducers: builder => {
         builder.addCase(getTodayForecast.fulfilled, (state, { payload }: { payload: ICurrentDayResponse[] }) => {
             state.currentDayData = payload[0];
@@ -87,17 +81,11 @@ const appSlice = createSlice({
     },
 });
 
-export const {
-    setSearchValue,
-} = appSlice.actions;
-
 export const selectCurrentConditionsData = (state: any) => state.app.currentDayData;
 
 export const selectNextDaysForecastData = (state: any) => state.app.nextFiveDaysForecast;
 
 export const selectHistoricalDayData = (state: any) => state.app.historicalDayData;
-
-export const selectSearchValue = (state: any) => state.app.searchValue;
 
 
 export default appSlice.reducer;

@@ -10,10 +10,11 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
     marginBottom: 15,
     "& p": {
-      fontSize: 17,
+      fontSize: 20,
       fontWeight: "bold",
       fontFamily: "monospace",
       color: "rgb(128 131 136)",
+      paddingLeft: 20,
     },
   },
 }));

@@ -12,6 +12,7 @@ import { Bar } from "react-chartjs-2";
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { EUnitType } from "../../store/models/enums/unitType.enum";
+import { celsiusToFahrenheit } from "../helpers/converter";
 
 ChartJS.register(
   CategoryScale,
@@ -60,7 +61,11 @@ const ChartHistoricalUI = ({ data, type }: IChartProps): JSX.Element => {
     datasets: [
       {
         label: "",
-        data: data.map((item) => item.Temperature.Metric.Value),
+        data: data.map((item: IHistoricalDayResponse) =>
+          type === EUnitType.CELSIUS
+            ? item.Temperature.Metric.Value
+            : celsiusToFahrenheit(item.Temperature.Metric.Value)
+        ),
         backgroundColor: "rgb(147, 153, 162)",
       },
     ],

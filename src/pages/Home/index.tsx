@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useCallback, useMemo, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -10,8 +11,6 @@ import {
   selectCurrentConditionsData,
   selectHistoricalDayData,
   selectNextDaysForecastData,
-  selectSearchValue,
-  setSearchValue,
 } from "../../store/slicers/app";
 import { AppDispatch } from "../../store";
 import {
@@ -19,24 +18,25 @@ import {
   ICurrentDayResponse,
   IForecastDataResponse,
 } from "../../store/models/interfaces/app.interface";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Divider, Typography } from "@mui/material";
 import { useStyles } from "./styles";
 import { fahrenheitToCelsius } from "../../shared/helpers/converter";
-import CardUI from "../../shared/ui/Card";
 import { weatherIconsData } from "../../shared/constants/weatherIconsData";
 import { IWeatherIcon } from "../../store/models/interfaces/icon.interface";
 import { format } from "date-fns";
 import ChartHistoricalUI from "../../shared/ui/Chart";
 import { EUnitType } from "../../store/models/enums/unitType.enum";
+import Umbrella from "../../assets/umbrella.png";
+import Cards from "../../shared/components/Cards";
+import Tabs from "../../shared/components/Tabs/Tabs";
 
 const Home = (): JSX.Element => {
   const [inputValue, setInputValue] = useState<string>("");
   const [options, setOptions] = useState<ICountryCityResponse[]>([]);
+  const [autocompleteValue,setAutocompleteValue] = useState<ICountryCityResponse | null>(null);
   const [type, setType] = useState<typeof EUnitType[keyof typeof EUnitType]>(
     EUnitType.CELSIUS
   );
-
-  const autocompleteValue = useSelector(selectSearchValue);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -93,18 +93,26 @@ const Home = (): JSX.Element => {
 
   const handleInputChange = (inputVal: string) => {
     setInputValue(inputVal);
-    fetchCities(inputVal);
+    if (inputVal) {
+      fetchCities(inputVal);
+    }
   };
 
   const handleChangeAutocompleteValue = (
     newValue: ICountryCityResponse | null
   ) => {
-    dispatch(setSearchValue(newValue));
+    setAutocompleteValue(newValue);
     if (newValue) {
       fetchNextFiveDaysForecast(newValue.Key);
       fetchTodayData(newValue.Key);
       fetchHistoricalData(newValue.Key);
     }
+  };
+
+  const handleChangeType = (
+    unitType: typeof EUnitType[keyof typeof EUnitType]
+  ) => {
+    setType(unitType);
   };
 
   const currentDay = useMemo((): ICurrentDayResponse | undefined => {
@@ -126,18 +134,6 @@ const Home = (): JSX.Element => {
     }
   }, []);
 
-  const realTemperatureFeelsLike = useMemo((): string | undefined => {
-    if (currentDay?.RealFeelTemperature.Value) {
-      const value =
-        type === EUnitType.CELSIUS
-          ? `${Math.round(
-              fahrenheitToCelsius(currentDay.RealFeelTemperature.Value)
-            )}\xB0`
-          : `${currentDay.RealFeelTemperature.Value}\xB0F`;
-      return value;
-    }
-  }, [currentDay?.RealFeelTemperature?.Value, type]);
-
   const findWeatherIcon = useCallback((val: string) => {
     if (val) {
       const icon = weatherIconsData.find(
@@ -151,7 +147,15 @@ const Home = (): JSX.Element => {
     <Fragment>
       <Box className={styles.container}>
         <Box className={styles.row}>
-          <Box className={styles.leftPane}>aa</Box>
+          <Box className={styles.leftPane}>
+            <Box className={styles.iconArea}>
+              <img src={Umbrella} alt="Logo" />
+              <Divider />
+            </Box>
+            {autocompleteValue && currentDay && (
+              <Tabs type={type} handleChange={handleChangeType} />
+            )}
+          </Box>
           <Box className={styles.center}>
             <Autocomplete
               className={styles.mainColor}
@@ -180,16 +184,15 @@ const Home = (): JSX.Element => {
               )}
             />
 
-            {currentDay && (
+            {autocompleteValue && currentDay && (
               <>
-                <Box pl={2}>
-                  {autocompleteValue && (
-                    <Typography variant="h3" mt={1.5}>
-                      {autocompleteValue.LocalizedName}
-                    </Typography>
-                  )}
+                <Box pl={2} className={styles.titleArea}>
+                  <Typography variant="h3" mt={4.3}>
+                    {autocompleteValue.LocalizedName}
+                  </Typography>
+
                   <Typography mt={3} color="darkgray">
-                    Chance of Rain: {currentDay.Rain.Value} %
+                    Chance of Rain: {currentDay.RainProbability}%
                   </Typography>
                   <Box display="flex" mt={5} justifyContent="space-between">
                     <Typography variant="h4" mt={3}>
@@ -205,39 +208,13 @@ const Home = (): JSX.Element => {
                     />
                   </Box>
 
-                  <Box
-                    display="flex"
-                    mt={5}
-                    justifyContent="space-between"
-                    flexWrap="wrap"
-                  >
-                    <CardUI
-                      title="Humidity"
-                      value={currentDay.IndoorRelativeHumidity}
-                      width="48%"
-                    />
-                    <CardUI
-                      title="Wind"
-                      value={`${currentDay.Wind.Speed.Value} ${currentDay.Wind.Speed.Unit}`}
-                      width="48%"
-                    />
-                    <CardUI
-                      title="Chance of Rain"
-                      value={`${currentDay.Rain.Value} %`}
-                      width="48%"
-                    />
-                    <CardUI
-                      title="Feels Like"
-                      value={`${realTemperatureFeelsLike}`}
-                      width="48%"
-                    />
-                  </Box>
+                  <Cards data={currentDay} type={type} />
                 </Box>
               </>
             )}
           </Box>
           <Box className={styles.rightPane}>
-            {nextFiveDaysData && historicalDayData && (
+            {autocompleteValue && nextFiveDaysData && historicalDayData && (
               <>
                 <Card style={{ backgroundColor: "rgb(234, 236, 239)" }}>
                   <CardContent color="#d4cbcb30">
@@ -267,7 +244,7 @@ const Home = (): JSX.Element => {
                                 alt={`day${index}`}
                                 className={styles.rightPaneItemImg}
                               />
-                              <Typography>
+                              <Typography textAlign="right" minWidth={50}>
                                 <span className={styles.bold}>
                                   {type === EUnitType.CELSIUS
                                     ? celsius(item.Temperature.Maximum.Value)
@@ -288,7 +265,7 @@ const Home = (): JSX.Element => {
                 <Card
                   style={{
                     backgroundColor: "rgb(234, 236, 239)",
-                    marginTop: 15,
+                    marginTop: 35,
                   }}
                 >
                   <CardContent color="#d4cbcb30">
